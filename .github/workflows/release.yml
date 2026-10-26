@@ -1,0 +1,31 @@
+name: Release
+
+# Push a tag such as v1.1.0 to build the macOS installer and attach it to a GitHub Release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  mac:
+    runs-on: macos-14   # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Unsigned build (macOS will ask the user to Control-click → Open on first launch).
+      # For a signed + notarized build, add the secrets described in RELEASE.md
+      # (CSC_LINK, CSC_KEY_PASSWORD, APPLE_API_KEY, APPLE_API_KEY_ID, APPLE_API_ISSUER)
+      # and switch the command to `npm run dist:mac:arm64`.
+      - run: npm run dist:mac:arm64:unsigned
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release/*.dmg
+            release/*.zip
+          generate_release_notes: true

@@ -1,0 +1,32 @@
+# dependencies & build output
+node_modules/
+dist/
+dist-electron/
+release/
+*.tsbuildinfo
+
+# macOS / editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# local backups & scratch files
+*.bak
+*.bak-*
+*.work
+*.orig
+
+# secrets — never commit signing material or credentials
+.env
+.env.*
+!.env.release.example
+*.p12
+*.p8
+*.cer
+*.mobileprovision
+
+# logs & test artefacts
+*.log
+npm-debug.log*
+coverage/

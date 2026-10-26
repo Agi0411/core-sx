@@ -1,0 +1,139 @@
+{
+  "name": "core-sx",
+  "version": "1.1.0",
+  "private": true,
+  "description": "Core SX — modern editor, MIDI controller and computer instrument for Roland SPD-SX / SPD-SX Special Edition.",
+  "main": "dist-electron/main/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite --host 127.0.0.1",
+    "dev:electron": "npm run build:electron && wait-on http://127.0.0.1:5173 && VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "parser:verify": "node scripts/verify-parser.mjs",
+    "preview": "vite preview",
+    "dist:mac": "npm run build && electron-builder --mac dmg zip",
+    "dist:mac:arm64": "npm run prepare:icon:mac && npm run build && electron-builder --mac dmg zip --arm64",
+    "dist:mac:dir": "npm run build && electron-builder --mac dir",
+    "postinstall": "electron-rebuild -f -w @julusian/midi",
+    "version-check": "node -e \"console.log(require(\\\"./package.json\\\").version)\"",
+    "prepare:icon:mac": "bash scripts/prepare-icon-mac.sh",
+    "dist:mac:intel": "npm run prepare:icon:mac && npm run build && electron-builder --mac dmg zip --x64",
+    "release:mac:arm64": "bash scripts/release-mac-arm64.sh",
+    "dist:mac:arm64:unsigned": "npm run prepare:icon:mac && npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac dmg zip --arm64 --config.mac.notarize=false --config.mac.gatekeeperAssess=false",
+    "dist:mac:unsigned": "npm run build && CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --mac dmg zip --config.mac.notarize=false --config.mac.gatekeeperAssess=false",
+    "test:fx": "npx --yes tsx tests/fx.test.ts",
+    "icons": "python3 scripts/make-icons.py"
+  },
+  "dependencies": {
+    "@julusian/midi": "3.7.2",
+    "framer-motion": "^14.0.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "4.0.2",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "6.0.4",
+    "concurrently": "9.2.1",
+    "electron": "43.2.0",
+    "electron-builder": "26.0.12",
+    "typescript": "7.0.2",
+    "vite": "8.1.0",
+    "wait-on": "9.0.1"
+  },
+  "build": {
+    "appId": "com.agi.coresx",
+    "productName": "Core SX",
+    "artifactName": "Core-SX-${version}-${arch}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json",
+      "node_modules/@julusian/midi/**"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node",
+      "node_modules/@julusian/midi/**"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "build/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist",
+      "notarize": true,
+      "extendInfo": {
+        "LSApplicationCategoryType": "public.app-category.music",
+        "NSMicrophoneUsageDescription": "Core SX only asks for this so macOS will show the names of your audio output devices. It never records audio.",
+        "NSAudioCaptureUsageDescription": "Core SX never records audio."
+      }
+    },
+    "dmg": {
+      "title": "Core SX",
+      "background": "build/dmg-background.png",
+      "window": {
+        "width": 760,
+        "height": 520
+      },
+      "iconSize": 128,
+      "contents": [
+        {
+          "x": 220,
+          "y": 280,
+          "type": "file"
+        },
+        {
+          "x": 540,
+          "y": 280,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "npmRebuild": true,
+    "nodeGypRebuild": false,
+    "extraResources": [
+      {
+        "from": "public/sounds",
+        "to": "sounds",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
+  "license": "MIT",
+  "author": "Agi Lin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/<your-account>/core-sx.git"
+  },
+  "bugs": {
+    "url": "https://github.com/<your-account>/core-sx/issues"
+  },
+  "homepage": "https://github.com/<your-account>/core-sx#readme",
+  "keywords": [
+    "roland",
+    "spd-sx",
+    "midi",
+    "electron",
+    "sampler",
+    "drum-pad",
+    "wav",
+    "audio"
+  ]
+}
